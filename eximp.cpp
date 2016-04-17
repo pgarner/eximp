@@ -20,45 +20,61 @@ int main(int argc, char** argv)
     if (argc <= 1)
         throw error("not enough args");
     var dir = argv[1];
-    std::cout << dir << std::endl;
 
     // Recurse the path to find files
     module mod("path");
     path* p = create(mod, dir);
     var rdir = p->rdir(true);
-    std::cout << rdir << std::endl;
 
     // Try to load EXIF data
     for (int i=0; i<rdir.size(); i++)
     {
         // Load
         var f = rdir.key(i);
-        std::cout << "Loading: " << f << std::endl;
+        std::cout << f.str() << " ";
 
-        // Is it even a photo
+        // Is it even a photo?
         EXIF exif(f);
         if (!exif.valid())
         {
-            std::cout << "EXIF Failed: " << f << std::endl;
+            // If there is no EXIF there's no point trying to continue
+            std::cout << "no EXIF" << std::endl;
             continue;
         }
 
         // It's a photo, can we infer the date from exif data?  Or from the
         // filename?
-        var d = exif.date(rdir[i]);
-        if (d)
-            std::cout << "EXIF Date: " << d << std::endl;
-        else
+        var d = exif.dateArray(rdir[i]);
+        var s;
+        if (!d)
         {
-            // No; dump it.
             std::cout << "Date: Failed" << std::endl;
-            exif.dump();
+            continue;
         }
+        else
+            s = exif.date(d);
 
         // Try for make and model
+        // ...this seems way too long
+        varstream mm;
         var m = exif.entry(EXIF_TAG_MAKE);
+        if (m)
+            mm << m.str();
         var n = exif.entry(EXIF_TAG_MODEL);
-        std::cout << m << "-" << n << std::endl;
+        if (n)
+        {
+            // Models don't need makes
+            n.replace("Canon ", "");
+            if (m)
+                mm << " ";
+            mm << n.str();
+        }
+        if (!m && !n)
+            mm << "Unknown";
+        m = var(mm).replace(" ", "-");
+
+        // Result
+        std::cout << "-> " << m.str() << "/" << s.str() << std::endl;
     }
 
     return 0;

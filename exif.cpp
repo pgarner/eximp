@@ -38,6 +38,7 @@ var EXIF::entry(ExifTag iTag)
     ExifEntry* e = exif_data_get_entry(mData, iTag);
     if (!e)
         return r;
+    // Debuggin'
     //exif_entry_dump(e, 2);
 
     switch (e->format)
@@ -46,9 +47,41 @@ var EXIF::entry(ExifTag iTag)
         r = var(e->components, (const char*)e->data);
         break;
     default:
-        throw lube::error("Unknown format in EXIF entry");
+        throw lube::error("EXIF::entry: Unknown format");
     }
     return r;
+}
+
+/**
+ * Helper function to return the date as an array of strings
+ */
+var EXIF::dateArray(var iStr)
+{
+    if (!valid())
+        throw lube::error("EXIF class invalid");
+
+    // Try for the DATE_TIME EXIF tag, then DATE_TIME_ORIGINAL; otherwise use
+    // the input hint, which is probably the filename
+    var r = entry(EXIF_TAG_DATE_TIME);
+    if (!r)
+        r = entry(EXIF_TAG_DATE_TIME_ORIGINAL);
+    if (!r)
+        r = iStr.copy();
+
+    // Parse it to get at least the ISO date and the month
+    //   iPhone has format 2015:01:01 17:31:46
+    //   Old Nokia has     2010:06:09 12:22:02
+    //   Old Samsung has   2012-12-02 04:08:18
+    //   Dropbox files are 2012-12-02 04.08.18
+    //   ISO format is     2012-12-02T04:08:18Z
+    // So we need to get rid of at least ':', '-' and '.', and the ISO tags.
+    // Actually, geeqie fails on that Samsung format
+    r.replace("[-:.TZ]", " ");
+    var s = r.strip().split(" ");
+    if (s[0].size() != 4) return lube::nil;
+    if (s[1].size() != 2) return lube::nil;
+    if (s[2].size() != 2) return lube::nil;
+    return s;
 }
 
 /**
@@ -82,28 +115,12 @@ var arrayToISODate(var d)
 }
 
 /**
- * Helper function to return the date as an ISO string
+ * Get the date, but as an ISO string rather than whatever format is in the
+ * file.
  */
-var EXIF::date(var iStr)
+var EXIF::date(var iArray)
 {
-    if (!valid())
-        throw lube::error("EXIF class invalid");
-
-    // Try for the DATE_TIME EXIF tag; otherwise use the input hint, which is
-    // probably the filename
-    var r = entry(EXIF_TAG_DATE_TIME);
-    if (!r)
-        r = iStr.copy();
-
-    // Parse it to get at least the ISO date and the month
-    //   iPhone has format 2015:01:01 17:31:46
-    //   Old Samsung has   2012-12-02 04:08:18
-    //   Files have        2012-12-02 04.08.18
-    // So we need to get rid of at least ':' and '-' and probably '.'
-    // Actually, geeqie fails on that Samsung format
-    r.replace("[-:.]", " ");
-    std::cout << "In: " << iStr << r << std::endl;
-    var s = r.strip().split(" ");
-    r = arrayToISODate(s);
+    var s = iArray ? iArray : dateArray();
+    var r = arrayToISODate(s);
     return r;
 }
