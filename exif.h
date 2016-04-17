@@ -21,7 +21,8 @@ public:
     ~EXIF();
     bool valid() { return mData; };
     void dump();
-    var date();
+    var entry(ExifTag iTag);
+    var date(var iStr=lube::nil);
 private:
     ExifData* mData;
 };
