@@ -87,6 +87,10 @@ var EXIF::dateArray(var iStr)
 /**
  * Convert the array to an ISO 8601 string
  * ie. 2016-04-17T09:09:48Z
+ *
+ * The colons may cause trouble on a FAT filesystem, in which case the answer
+ * is to use the same string without hyphens or colons; that's still an ISO
+ * standard date.
  */
 var arrayToISODate(var d)
 {

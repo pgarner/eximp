@@ -17,8 +17,11 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(LibUBE REQUIRED)
 find_package(LibEXIF REQUIRED)
+find_package(Boost COMPONENTS
+  filesystem REQUIRED
+  )
 include_directories(${LIBUBE_INCLUDE_DIRS} ${LIBEXIF_INCLUDE_DIRS})
-set(TARGET_LIBS ${LIBUBE_LIBRARIES} ${LIBEXIF_LIBRARIES})
+set(TARGET_LIBS ${LIBUBE_LIBRARIES} ${LIBEXIF_LIBRARIES} ${Boost_LIBRARIES})
 
 # Main executable
 add_executable(eximp eximp.cpp exif.cpp)
