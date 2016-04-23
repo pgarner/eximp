@@ -44,15 +44,15 @@ int main(int argc, char** argv)
 
         // It's a photo, can we infer the date from exif data?  Or from the
         // filename?
-        var d = exif.dateArray(rdir[i]);
-        var s;
-        if (!d)
+        var da = exif.dateArray(rdir[i]);
+        if (!da)
         {
             std::cout << "Date: Failed" << std::endl;
             continue;
         }
-        else
-            s = exif.date(d);
+        var date = exif.date(da);
+        var year = da[0];
+        var month = da[1];
 
         // Try for make and model
         // ...this seems way too long
@@ -65,6 +65,10 @@ int main(int argc, char** argv)
         {
             // Models don't need makes
             n.replace("Canon ", "");
+            n.replace("HTC ", "");
+            n.replace("HTC_", "");
+            n.replace("BlackBerry ", "");
+            n.replace("NIKON ", "");
             if (m)
                 mm << " ";
             mm << n.str();
@@ -74,7 +78,10 @@ int main(int argc, char** argv)
         m = var(mm).replace(" ", "-");
 
         // Result
-        std::cout << "-> " << m.str() << "/" << s.str() << std::endl;
+        std::cout << "-> "
+                  << year.str() << "/"
+                  << month.str() << "/"
+                  << m.str() << "/" << date.str() << std::endl;
     }
 
     return 0;
