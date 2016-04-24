@@ -74,6 +74,7 @@ var EXIF::dateArray(var iStr)
     //   Old Samsung has   2012-12-02 04:08:18
     //   Dropbox files are 2012-12-02 04.08.18
     //   ISO format is     2012-12-02T04:08:18Z
+    //              or     20121202T040818Z
     // So we need to get rid of at least ':', '-' and '.', and the ISO tags.
     // Actually, geeqie fails on that Samsung format
     r.replace("[-:.TZ]", " ");
@@ -85,29 +86,36 @@ var EXIF::dateArray(var iStr)
 }
 
 /**
- * Convert the array to an ISO 8601 string
- * ie. 2016-04-17T09:09:48Z
+ * Convert the array to an ISO 8601 string, i.e.,
+ *  extended: 2016-04-17T09:09:48Z
+ *     basic: 20160417T090948Z
  *
  * The colons may cause trouble on a FAT filesystem, in which case the answer
- * is to use the same string without hyphens or colons; that's still an ISO
- * standard date.
+ * is to use the "basic format" - the same string without hyphens or colons;
+ * that's still an ISO standard date.
  */
-var arrayToISODate(var d)
+var arrayToISODate(var iArray, bool iBasic=false)
 {
     // How long is it?
-    int s = d.size();
+    int s = iArray.size();
     if (s > 6)
         s = 6;
 
     // Format to a stream
+    const char* dsep = iBasic ? "" : "-";
+    const char* tsep = iBasic ? "" : ":";
     varstream iso;
     switch (s)
     {
     case 6:
         // The most likely; three date and three time fields
-        iso << d[0].str() << "-" << d[1].str() << "-" << d[2].str();
+        iso << iArray[0].str() << dsep
+            << iArray[1].str() << dsep
+            << iArray[2].str();
         iso << "T";
-        iso << d[3].str() << ":" << d[4].str() << ":" << d[5].str();
+        iso << iArray[3].str() << tsep
+            << iArray[4].str() << tsep
+            << iArray[5].str();
         iso << "Z";
         break;
         //default:
@@ -119,12 +127,12 @@ var arrayToISODate(var d)
 }
 
 /**
- * Get the date, but as an ISO string rather than whatever format is in the
- * file.
+ * Get the date, but as a basic ISO string rather than whatever format is in
+ * the file.
  */
 var EXIF::date(var iArray)
 {
     var s = iArray ? iArray : dateArray();
-    var r = arrayToISODate(s);
+    var r = arrayToISODate(s, true);
     return r;
 }

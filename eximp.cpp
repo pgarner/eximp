@@ -66,6 +66,11 @@ var target(var iPrefix, var iPath, var iBit)
         mm << "Unknown";
     m = var(mm).replace(" ", "-");
 
+    // Check for a label after the month
+    var label = iPath.search("\\/\\d\\d(-\\S+)\\/");
+    if (label)
+        month.append(label[1]);
+
     // Result
     var path;
     path.push(iPrefix);
@@ -91,7 +96,7 @@ void usage()
 
 int main(int argc, char** argv)
 {
-    // Use wordexp to expand the tilde in the prefix.  Wordexp is cool; it
+    // Use wordexp to expand the tilde in the prefix.  wordexp is cool; it
     // should be in lube!
     var prefix = "~/Pictures/Import";
     wordexp_t we;
