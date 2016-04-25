@@ -26,6 +26,10 @@ set(TARGET_LIBS ${LIBUBE_LIBRARIES} ${LIBEXIF_LIBRARIES} ${Boost_LIBRARIES})
 # Main executable
 add_executable(eximp eximp.cpp exif.cpp)
 target_link_libraries(eximp ${TARGET_LIBS})
+install(
+  TARGETS eximp
+  RUNTIME DESTINATION bin
+  )
 
 # The exiv library
 #add_library(exif-lib MODULE exif.cpp)
