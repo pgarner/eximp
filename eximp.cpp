@@ -151,7 +151,8 @@ int main(int argc, char** argv)
         }
 
         // Create path
-        fs::create_directories(t[0].str());
+        if (really)
+            fs::create_directories(t[0].str());
         var ext = t.pop();
         t = t.join("/");
         t.append(ext);
