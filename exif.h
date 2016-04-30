@@ -22,8 +22,7 @@ public:
     bool valid() { return mData; };
     void dump();
     var entry(ExifTag iTag);
-    var dateArray(var iStr=lube::nil);
-    var date(var iArray=lube::nil);
+    var date();
 private:
     ExifData* mData;
 };
