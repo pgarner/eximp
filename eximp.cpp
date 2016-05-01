@@ -140,8 +140,7 @@ var exifData(var iPath)
 }
 
 /**
- * Look up EXIF information to convert a path of a photo to a path in an
- * archive.
+ * Look up information to convert a path of a photo to a path in an archive.
  *
  * Returns an array with three components: path, stem and extension.
  */
@@ -181,9 +180,10 @@ var target(var iPrefix, var iPath, var iBit)
 void usage()
 {
     std::cerr <<
-        "Usage: eximp [-r] <dir>\n" <<
-        " dir: directory (or file) to import\n" <<
+        "Usage: eximp [opts] <dir> [dir dir ...]\n" <<
+        " dir: directories (or files) to import\n" <<
         "  -r: Really do it instead of reporting what would be done\n" <<
+        "  -v: Verbose; dump EXIF records and the like\n" <<
         "Nothing is actually moved unless -r is specified\n";
     exit(1);
 }
