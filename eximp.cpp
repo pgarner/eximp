@@ -13,6 +13,7 @@
 #include <wordexp.h>
 
 #include "exif.h"
+#include "avformat.h"
 
 using namespace lube;
 namespace fs = boost::filesystem;
@@ -140,6 +141,42 @@ var exifData(var iPath)
 }
 
 /**
+ * Get the date and encoder from an AVFormat record
+ */
+var avData(var iPath)
+{
+    AVFormat av(iPath);
+    if (!av.valid())
+        return nil;
+    if (verbose)
+    {
+        std::cout << std::endl;
+        av.dump();
+    }
+
+    // Date is in the AV file
+    var date = av.date();
+    if (!date)
+    {
+        std::cout << " [no AV date]";
+        return nil;
+    }
+    var da = dateMatch(date);
+
+    // Make model is 'encoder'
+    var mm = av.tag("encoder");
+    if (!mm)
+        mm = "Unknown";
+
+    // Date array plus make-model
+    var meta;
+    meta[0] = da;
+    meta[1] = mm;
+    return meta;
+}
+
+
+/**
  * Look up information to convert a path of a photo to a path in an archive.
  *
  * Returns an array with three components: path, stem and extension.
@@ -148,6 +185,9 @@ var target(var iPrefix, var iPath, var iBit)
 {
     // First try for EXIF data
     var meta = exifData(iPath);
+    if (!meta)
+        // Try AVFormat data
+        meta = avData(iPath);
     if (!meta)
     {
         // Fall back on the file name
