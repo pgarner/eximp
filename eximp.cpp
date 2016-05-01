@@ -17,6 +17,8 @@
 using namespace lube;
 namespace fs = boost::filesystem;
 
+bool verbose = false;
+
 /**
  * Convert an array (of strings) to an ISO 8601 string, i.e.,
  *  extended: 2016-04-17T09:09:48Z
@@ -63,16 +65,16 @@ var arrayToISODate(var iArray, bool iBasic=false)
  */
 var dateMatch(var iStr)
 {
-    //   Dropbox files are 2012-12-02 04.08.18
-    //   ISO format is     2012-12-02T04:08:18Z
-    //              or     20121202T040818Z
+    // Dropbox files are 2012-12-02 04.08.18
+    // ISO format is     2012-12-02T04:08:18Z
+    //            or     20121202T040818Z
     //
     // Use search rather than match to skip leading crap.  There must be a
     // better syntax than this; \\\\. is to escape both the compiler and the RE
-    // parser.
+    // parser.  Literal '-' must be last in a [] expression.
     var array = iStr.search(
         "(\\d\\d\\d\\d)[:-]?(\\d\\d)[:-]?(\\d\\d)"
-        "[T ]?(\\d\\d)[:-\\\\.]?(\\d\\d)[:-\\\\.]?(\\d\\d)Z?"
+        "[T_ -]?(\\d\\d)[:\\\\.-]?(\\d\\d)[:\\\\.-]?(\\d\\d)Z?"
     );
 
     // There should be 6 matches in an array of length 7
@@ -92,6 +94,11 @@ var exifData(var iPath)
     EXIF exif(iPath);
     if (!exif.valid())
         return nil;
+    if (verbose)
+    {
+        std::cout << std::endl;
+        exif.dump();
+    }
 
     // It's a photo, can we infer the date from exif data?
     var da = exif.date();
@@ -116,6 +123,7 @@ var exifData(var iPath)
         n.replace("HTC_", "");
         n.replace("BlackBerry ", "");
         n.replace("NIKON ", "");
+        n.replace("KODAK ", "");
         if (m)
             mm << " ";
         mm << n.str();
@@ -149,8 +157,8 @@ var target(var iPrefix, var iPath, var iBit)
         if (!meta[0])
             return nil;
     }
-    var year = meta[0][0];
-    var month = meta[0][1];
+    var year = meta[0][0].copy();
+    var month = meta[0][1].copy();
 
     // Check for a label after the month
     var label = iPath.search("\\/\\d\\d(-\\S+)\\/");
@@ -203,6 +211,9 @@ int main(int argc, char** argv)
             case 'r':
                 really = true;
                 break;
+            case 'v':
+                verbose = true;
+                break;
             default:
                 usage();
             }
@@ -215,45 +226,48 @@ int main(int argc, char** argv)
     if (dir.size() < 1)
         usage();
 
-    // Recurse the path to find files
-    module mod("path");
-    path* p = create(mod, dir[0]); // Just one for now
-    var rdir = p->rdir(true);
-    for (int i=0; i<rdir.size(); i++)
+    // Recurse the paths to find files
+    for (int d=0; d<dir.size(); d++)
     {
-        var s = rdir.key(i);
-
-        // Check it's actually a file, not a directory
-        if (fs::is_directory(s.str()))
-            continue;
-        std::cout << s.str();
-
-        // Convert to target path
-        var t = target(prefix, s, rdir[i]);
-        if (!t)
+        module mod("path");
+        path* p = create(mod, dir[d]);
+        var rdir = p->rdir(true);
+        for (int i=0; i<rdir.size(); i++)
         {
-            std::cout << " [no usable metadata]" << std::endl;
-            continue;
+            var s = rdir.key(i);
+
+            // Check it's actually a file, not a directory
+            if (fs::is_directory(s.str()))
+                continue;
+            std::cout << s.str();
+
+            // Convert to target path
+            var t = target(prefix, s, rdir[i]);
+            if (!t)
+            {
+                std::cout << " [no usable metadata]" << std::endl;
+                continue;
+            }
+
+            // Create path
+            if (really)
+                fs::create_directories(t[0].str());
+            var ext = t.pop();
+            t = t.join("/");
+            t.append(ext);
+
+            // Check for overwrite; eximp should never overwrite
+            if (fs::exists(t.str()))
+            {
+                std::cout << " [target " << t.str() << " exists]" << std::endl;
+                continue;
+            }
+
+            // Result
+            std::cout << " -> " << t.str() << std::endl;
+            if (really)
+                fs::rename(s.str(), t.str());
         }
-
-        // Create path
-        if (really)
-            fs::create_directories(t[0].str());
-        var ext = t.pop();
-        t = t.join("/");
-        t.append(ext);
-
-        // Check for overwrite; eximp should never overwrite
-        if (fs::exists(t.str()))
-        {
-            std::cout << "target exists" << std::endl;
-            continue;
-        }
-
-        // Result
-        std::cout << " -> " << t.str() << std::endl;
-        if (really)
-            fs::rename(s.str(), t.str());
     }
 
     return 0;

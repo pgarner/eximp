@@ -15,6 +15,6 @@ export CXX=clang++
 export CPATH=~/local/include
 
 cmake \
-    -D CMAKE_BUILD_TYPE=debug \
+    -D CMAKE_BUILD_TYPE=minsizerel \
     -D CMAKE_INSTALL_PREFIX=~/local \
     ..
