@@ -163,7 +163,7 @@ var avData(var iPath)
     }
     var da = dateMatch(date);
 
-    // Make model is 'encoder'
+    // Make model is, for the moment at least, 'encoder'
     var mm = av.tag("encoder");
     if (!mm)
         mm = "Unknown";
@@ -200,7 +200,7 @@ var target(var iPrefix, var iPath, var iBit)
     var month = meta[0][1].copy();
 
     // Check for a label after the month
-    var label = iPath.search("\\/\\d\\d(-\\S+)\\/");
+    var label = iPath.search("\\/\\d\\d(-[^\\/]+)\\/");
     if (label)
         month.append(label[1]);
 
