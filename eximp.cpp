@@ -267,11 +267,11 @@ int main(int argc, char** argv)
         usage();
 
     // Recurse the paths to find files
+    pathmodule mod;
     for (int d=0; d<dir.size(); d++)
     {
-        module mod("path");
-        path* p = create(mod, dir[d]);
-        var rdir = p->rdir(true);
+        path& p = mod.create(dir[d]);
+        var rdir = p.rdir(true);
         for (int i=0; i<rdir.size(); i++)
         {
             var s = rdir.key(i);
