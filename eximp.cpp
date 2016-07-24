@@ -163,15 +163,22 @@ var avData(var iPath)
     }
     var da = dateMatch(date);
 
-    // Make model is, for the moment at least, 'encoder'
-    var mm = av.tag("encoder");
+    // Recently, on iPhone at least, make & model exist
+    var mm;
+    mm[0] = av.tag("make");
+    mm[1] = av.tag("model");
+    if (mm[0])
+        mm = mm.join("-");
+    else
+        // Fall back to 'encoder'
+        mm = av.tag("encoder");
     if (!mm)
         mm = "Unknown";
 
     // Date array plus make-model
     var meta;
     meta[0] = da;
-    meta[1] = mm;
+    meta[1] = var(mm).replace(" ", "-");
     return meta;
 }
 
