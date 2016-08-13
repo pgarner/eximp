@@ -9,6 +9,7 @@
 
 #include <lube.h>
 #include <lube/path.h>
+#include <lube/config.h>
 #include <boost/filesystem/operations.hpp>
 #include <wordexp.h>
 
@@ -224,17 +225,6 @@ var target(var iPrefix, var iPath, var iBit)
     return ret;
 }
 
-void usage()
-{
-    std::cerr <<
-        "Usage: eximp [opts] <dir> [dir dir ...]\n" <<
-        " dir: directories (or files) to import\n" <<
-        "  -r: Really do it instead of reporting what would be done\n" <<
-        "  -v: Verbose; dump EXIF records and the like\n" <<
-        "Nothing is actually moved unless -r is specified\n";
-    exit(1);
-}
-
 int main(int argc, char** argv)
 {
     // Use wordexp to expand the tilde in the prefix.  wordexp is cool; it
@@ -247,31 +237,24 @@ int main(int argc, char** argv)
     wordfree(&we);
 
     // Command line
-    var dir;
-    bool really = false;
-    for (int i=1; i<argc; i++)
-    {
-        if (argv[i][0] == '-')
-            // It's a switch
-            switch (argv[i][1])
-            {
-            case 'r':
-                really = true;
-                break;
-            case 'v':
-                verbose = true;
-                break;
-            default:
-                usage();
-            }
-        else
-            // It's a directory
-            dir.push(argv[i]);
-    }
+    Option o("EXIMP: metadata based media importer");
+    o(" <args> is a list of directories (at least one) that are recursed");
+    o('t', "Import target directory", prefix);
+    o('r', "Rename files; only works on the same filesystem");
+    o('c', "Copy files; works across filesystems");
+    o('v', "Be verbose; dump EXIF records and the like");
+    o("Nothing is actually done unless -r or -c are specified");
+    o.parse(argc, argv);
+    var dir = o;
+    verbose = o['v'].defined();
+
+    // Check for nonsense options
+    if (o['r'] && o['c'])
+        o.usage(1);
 
     // Check we have a path
     if (dir.size() < 1)
-        usage();
+        o.usage(1);
 
     // Recurse the paths to find files
     pathmodule mod;
@@ -289,7 +272,7 @@ int main(int argc, char** argv)
             std::cout << s.str();
 
             // Convert to target path
-            var t = target(prefix, s, rdir[i]);
+            var t = target(o['t'], s, rdir[i]);
             if (!t)
             {
                 std::cout << " [no usable metadata]" << std::endl;
@@ -297,7 +280,7 @@ int main(int argc, char** argv)
             }
 
             // Create path
-            if (really)
+            if (o['r'] || o['c'])
                 fs::create_directories(t[0].str());
             var ext = t.pop();
             t = t.join("/");
@@ -312,8 +295,10 @@ int main(int argc, char** argv)
 
             // Result
             std::cout << " -> " << t.str() << std::endl;
-            if (really)
+            if (o['r'])
                 fs::rename(s.str(), t.str());
+            else if (o['c'])
+                fs::copy(s.str(), t.str());
         }
     }
 
