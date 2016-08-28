@@ -245,7 +245,7 @@ int main(int argc, char** argv)
     o('v', "Be verbose; dump EXIF records and the like");
     o("Nothing is actually done unless -r or -c are specified");
     o.parse(argc, argv);
-    var dir = o;
+    var dir = o.args();
     verbose = o['v'].defined();
 
     // Check for nonsense options
