@@ -242,6 +242,7 @@ int main(int argc, char** argv)
     o('t', "Import target directory", prefix);
     o('r', "Rename files; only works on the same filesystem");
     o('c', "Copy files; works across filesystems");
+    o('m', "Move files; works across filesystems using copy then remove");
     o('v', "Be verbose; dump EXIF records and the like");
     o("Nothing is actually done unless -r or -c are specified");
     o.parse(argc, argv);
@@ -280,7 +281,7 @@ int main(int argc, char** argv)
             }
 
             // Create path
-            if (o['r'] || o['c'])
+            if (o['r'] || o['c'] || o['m'])
                 fs::create_directories(t[0].str());
             var ext = t.pop();
             t = t.join("/");
@@ -299,6 +300,15 @@ int main(int argc, char** argv)
                 fs::rename(s.str(), t.str());
             else if (o['c'])
                 fs::copy(s.str(), t.str());
+            else if (o['m'])
+            {
+                boost::system::error_code ec;
+                fs::copy(s.str(), t.str(), ec);
+                if (ec.value() == 0)
+                    fs::remove(s.str());
+                else
+                    std::cout << "Error: " << ec.message() << std::endl;
+            }
         }
     }
 
