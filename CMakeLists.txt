@@ -15,6 +15,14 @@ set(VERSION 0.1)
 set(CMAKE_CXX_FLAGS "-Wall -Werror -std=c++11")
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+if (NOT EXISTS "${CMAKE_MODULE_PATH}/FindLibUBE.cmake")
+  message(STATUS "Downloading FindLibUBE.cmake")
+  file(DOWNLOAD
+    "https://github.com/pgarner/libube/raw/master/cmake/FindLibUBE.cmake"
+    "${CMAKE_MODULE_PATH}/FindLibUBE.cmake"
+    )
+endif()
+
 find_package(LibUBE REQUIRED)
 find_package(LibEXIF REQUIRED)
 # find_package(PNG REQUIRED)
