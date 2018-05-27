@@ -245,13 +245,19 @@ int main(int argc, char** argv)
     o('c', "Copy files; works across filesystems");
     o('m', "Move files; works across filesystems using copy then remove");
     o('v', "Be verbose; dump EXIF records and the like");
-    o("Nothing is actually done unless -r or -c are specified");
+    o('n', "Append version numbers to files (deals with duplicates)");
+    o('d', "Write out duplicates in the form of a diff command");
+    o("Nothing is actually done unless -r, -c or -m are specified");
     o.parse(argc, argv);
     var dir = o.args();
     verbose = o['v'].defined();
 
     // Check for nonsense options
-    if (o['r'] && o['c'])
+    int n = 0;
+    if (o['r']) n++;
+    if (o['c']) n++;
+    if (o['m']) n++;
+    if (n > 1)
         o.usage(1);
 
     // Check we have a path
@@ -274,37 +280,79 @@ int main(int argc, char** argv)
             std::cout << s.str();
 
             // Convert to target path
-            var t = target(o['t'], s, rdir[i]);
-            if (!t)
+            var base = target(o['t'], s, rdir[i]);
+            if (!base)
             {
                 std::cout << " [no usable metadata]" << std::endl;
                 continue;
             }
 
-            // Create path
+            // Create path as base and extension
             if (o['r'] || o['c'] || o['m'])
-                fs::create_directories(t[0].str());
-            var ext = t.pop();
-            t = t.join("/");
-            t.append(ext);
+                fs::create_directories(base[0].str());
+            var ext = base.pop();
+            base = base.join("/");
+
+            // Check if the unversioned or zero-versioned file exists and keep
+            // the path
+            var path = base.copy();
+            path.append("-0");
+            path.append(ext);
+            bool exists = fs::exists(path.str());
+            if (!exists)
+            {
+                path = base.copy();
+                path.append(ext);
+                exists = fs::exists(path.str());
+            }
 
             // Check for overwrite; eximp should never overwrite
-            if (fs::exists(t.str()))
+            if (!o['n'] && exists)
             {
-                std::cout << " [target " << t.str() << " exists]" << std::endl;
+                if (o['d'])
+                    std::cout
+                        << " [exists]\n"
+                        << "diff " << s << " " << path
+                        << std::endl;
+                else
+                    std::cout
+                        << " [target " << path.str() << " exists]"
+                        << std::endl;
                 continue;
             }
 
+            // Build a versioned path
+            if (o['n'])
+            {
+                int version = exists ? 1 : 0;
+                do
+                {
+                    if (version > 99)
+                    {
+                        std::cout
+                            << " Probable error: version number > 99"
+                            << std::endl;
+                        exit(1);
+                    }
+                    path = base.copy();
+                    varstream v;
+                    v << "-" << version++;
+                    path.append(v);
+                    path.append(ext);
+                }
+                while (fs::exists(path.str()));
+            }
+
             // Result
-            std::cout << " -> " << t.str() << std::endl;
+            std::cout << " -> " << path.str() << std::endl;
             if (o['r'])
-                fs::rename(s.str(), t.str());
+                fs::rename(s.str(), path.str());
             else if (o['c'])
-                fs::copy(s.str(), t.str());
+                fs::copy(s.str(), path.str());
             else if (o['m'])
             {
                 boost::system::error_code ec;
-                fs::copy(s.str(), t.str(), ec);
+                fs::copy(s.str(), path.str(), ec);
                 if (ec.value() == 0)
                     fs::remove(s.str());
                 else
