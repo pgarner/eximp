@@ -14,7 +14,7 @@
 #include <wordexp.h>
 
 #include "exif.h"
-#include "avformat.h"
+// #include "avformat.h"
 
 using namespace lube;
 namespace fs = boost::filesystem;
@@ -141,6 +141,7 @@ var exifData(var iPath)
     return meta;
 }
 
+#if 0
 /**
  * Get the date and encoder from an AVFormat record
  */
@@ -182,7 +183,7 @@ var avData(var iPath)
     meta[1] = var(mm).replace(" ", "-");
     return meta;
 }
-
+#endif
 
 /**
  * Look up information to convert a path of a photo to a path in an archive.
@@ -193,9 +194,9 @@ var target(var iPrefix, var iPath, var iBit)
 {
     // First try for EXIF data
     var meta = exifData(iPath);
-    if (!meta)
+    //if (!meta)
         // Try AVFormat data
-        meta = avData(iPath);
+        //meta = avData(iPath);
     if (!meta)
     {
         // Fall back on the file name

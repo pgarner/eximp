@@ -9,7 +9,7 @@
 #
 rm -rf CMakeCache.txt CMakeFiles cmake_install.cmake
 
-export CC=clang
+export CC="clang -w"
 export CXX=clang++
 
 export CPATH=~/local/include
