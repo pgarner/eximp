@@ -15,6 +15,7 @@
 
 #include "exif.h"
 // #include "avformat.h"
+#include "mp4v2.h"
 
 using namespace lube;
 namespace fs = boost::filesystem;
@@ -186,6 +187,26 @@ var avData(var iPath)
 #endif
 
 /**
+ * Get the date from an MP4 file
+ */
+var mp4Data(var iPath)
+{
+    MP4 mp4(iPath);
+    if (!mp4.valid())
+        return nil;
+    if (verbose)
+    {
+        std::cout << std::endl;
+        mp4.dump();
+    }
+
+    // Meta
+    var meta = 0;
+    return meta;
+}
+
+
+/**
  * Look up information to convert a path of a photo to a path in an archive.
  *
  * Returns an array with three components: path, stem and extension.
@@ -194,9 +215,14 @@ var target(var iPrefix, var iPath, var iBit)
 {
     // First try for EXIF data
     var meta = exifData(iPath);
-    //if (!meta)
+#if 0
+    if (!meta)
         // Try AVFormat data
-        //meta = avData(iPath);
+        meta = avData(iPath);
+#endif
+    if (!meta)
+        // Try MP4 data
+        meta = mp4Data(iPath);
     if (!meta)
     {
         // Fall back on the file name
