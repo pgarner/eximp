@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 #
 # Copyright 2015 by Idiap Research Institute, http://www.idiap.ch
 #
@@ -14,7 +14,8 @@ export CXX=clang++
 
 export CPATH=~/local/include
 
-cmake \
-    -D CMAKE_BUILD_TYPE=minsizerel \
-    -D CMAKE_INSTALL_PREFIX=~/local \
-    ..
+opts=(
+    -D CMAKE_BUILD_TYPE=relwithdebinfo
+    -D CMAKE_INSTALL_PREFIX=~/local
+)
+cmake $opts ..
