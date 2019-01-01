@@ -17,6 +17,14 @@ EXIF::EXIF(var iPath)
         exif_data_fix(mData);
 }
 
+EXIF::EXIF(const unsigned char *iData, unsigned int iSize)
+{
+    mData = exif_data_new_from_data(iData, iSize);
+    if (mData)
+        // I'm not sure this is necessary, but it feels good
+        exif_data_fix(mData);
+}
+
 EXIF::~EXIF()
 {
     if (mData)

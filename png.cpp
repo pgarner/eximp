@@ -7,7 +7,10 @@
  *   Phil Garner, April 2016
  */
 
+#include <cassert>
+#include <iomanip>
 #include "png.h"
+#include "exif.h"
 
 void PNG::load(var iFileName)
 {
@@ -41,7 +44,6 @@ void PNG::load(var iFileName)
     // Low level read: only read the header information
     png_read_info(mData, mInfo);
     fclose(fp);
-    std::cout << "Loaded: " << iFileName.str() << std::endl;
 }
 
 PNG::PNG()
@@ -64,29 +66,61 @@ PNG::~PNG()
     mInfo = 0;    
 }
 
+
+void PNG::dump()
+{
+    // Text chunks
+    png_textp textp = 0;
+    int ntext = 0;
+    png_get_text(mData, mInfo, &textp, &ntext);
+    var text;
+    for (int i=0; i<ntext; i++)
+        text[textp[i].key] = textp[i].text;
+    std::cout << "Text: " << text << std::endl;
+
+    // EXIF
+    // The library reports "png_get_eXIf does not work; use png_get_eXIf_1"
+    png_bytep exif_data = 0;
+    png_uint_32 num_exif = 0;
+    png_uint_32 pngRet = png_get_eXIf_1(mData, mInfo, &num_exif, &exif_data);
+    if (pngRet)
+    {
+        assert(exif_data);
+        EXIF exif(exif_data, num_exif);
+        exif.dump();
+        std::cout << "EXIF date: " << exif.date() << std::endl;
+    }
+}
+
+var format(int iNumber, int iWidth)
+{
+    varstream vs;
+    vs << std::setw(iWidth) << std::setfill('0');
+    vs << iNumber;
+    return var(vs);
+}
+
+/**
+ * Try for modification time.  png_get_tIME() should return PNG_INFO_tIME on
+ * success or 0 otherwise.  Then we handle time as an array of six strings like
+ * (my) exif for the moment.
+ */
 var PNG::date()
 {
     if (!valid())
         return lube::nil;
 
-    // Try for modification time
-    png_timep timep;
-    png_get_tIME(mData, mInfo, &timep);
-    if (timep)
-        std::cout << "Time: "
-                  << timep->year << "-"
-                  << timep->minute
-                  << std::endl;
-
-    // Text chunks
-    png_textp text;
-    int ntext;
-    png_get_text(mData, mInfo, &text, &ntext);
-    std::cout << "Text: " << ntext << std::endl;
-    for (int i=0; i<ntext; i++)
-    {
-        std::cout << "Key: " << text[i].key << std::endl;
-        std::cout << "Txt: " << text[i].text << std::endl;
-    }
-    return lube::nil;
+    png_timep timep = 0;
+    png_uint_32 pngRet = png_get_tIME(mData, mInfo, &timep);
+    if (!pngRet)
+        return lube::nil;
+    assert(timep);
+    var time;
+    time[0] = format(timep->year, 4);
+    time[1] = format(timep->month, 2);
+    time[2] = format(timep->day, 2);
+    time[3] = format(timep->hour, 2);
+    time[4] = format(timep->minute, 2);
+    time[5] = format(timep->second, 2);
+    return time;
 }

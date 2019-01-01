@@ -25,34 +25,34 @@ endif()
 
 find_package(LibUBE REQUIRED)
 find_package(LibEXIF REQUIRED)
+find_package(PNG REQUIRED)
 # find_package(LibAVFormat REQUIRED)
-find_package(LibMP4v2)
-# find_package(PNG REQUIRED)
+# find_package(LibMP4v2)
 find_package(Boost COMPONENTS
   filesystem REQUIRED
   )
 include_directories(
   ${LIBUBE_INCLUDE_DIRS}
   ${LIBEXIF_INCLUDE_DIRS}
+  ${PNG_INCLUDE_DIRS}
 #  ${LIBAVFORMAT_INCLUDE_DIRS}
-  ${LIBMP4V2_INCLUDE_DIRS}
-#  ${PNG_INCLUDE_DIRS}
+#  ${LIBMP4V2_INCLUDE_DIRS}
   )
 set(TARGET_LIBS
   ${LIBUBE_LIBRARIES}
   ${LIBEXIF_LIBRARIES}
+  ${PNG_LIBRARIES}
 #  ${LIBAVFORMAT_LIBRARIES}
-  ${LIBMP4V2_LIBRARIES}
-#  ${PNG_LIBRARIES}
+#  ${LIBMP4V2_LIBRARIES}
   ${Boost_LIBRARIES}
   )
 
 # Main executable
 add_executable(eximp eximp.cpp
   exif.cpp
+  png.cpp
 #  avformat.cpp
-  mp4v2.cpp
-#  png.cpp
+#  mp4v2.cpp
   )
 target_link_libraries(eximp ${TARGET_LIBS})
 install(

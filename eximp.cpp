@@ -14,8 +14,9 @@
 #include <wordexp.h>
 
 #include "exif.h"
+#include "png.h"
 // #include "avformat.h"
-#include "mp4v2.h"
+// #include "mp4v2.h"
 
 using namespace lube;
 namespace fs = boost::filesystem;
@@ -142,6 +143,35 @@ var exifData(var iPath)
     return meta;
 }
 
+/**
+ * Get the date from a PNG file
+ */
+var pngData(var iPath)
+{
+    // Is it even a photo?
+    // If there is no EXIF there's no point trying to continue
+    PNG png(iPath);
+    if (!png.valid())
+        return nil;
+    if (verbose)
+    {
+        std::cout << std::endl;
+        png.dump();
+    }
+
+    // It's a photo, can we infer the date from exif data?
+    var da = png.date();
+    if (!da)
+    {
+        std::cout << " [no PNG date]";
+        return nil;
+    }
+    var meta;
+    meta[0] = da;
+    meta[1] = "Unknown";
+    return meta;
+}
+
 #if 0
 /**
  * Get the date and encoder from an AVFormat record
@@ -184,7 +214,6 @@ var avData(var iPath)
     meta[1] = var(mm).replace(" ", "-");
     return meta;
 }
-#endif
 
 /**
  * Get the date from an MP4 file
@@ -204,6 +233,7 @@ var mp4Data(var iPath)
     var meta = 0;
     return meta;
 }
+#endif
 
 
 /**
@@ -215,14 +245,19 @@ var target(var iPrefix, var iPath, var iBit)
 {
     // First try for EXIF data
     var meta = exifData(iPath);
+    if (!meta)
+        // Try PNG data
+        meta = pngData(iPath);
 #if 0
     if (!meta)
         // Try AVFormat data
         meta = avData(iPath);
-#endif
     if (!meta)
         // Try MP4 data
         meta = mp4Data(iPath);
+#endif
+    if (verbose)
+        std::cout << "Meta: " << meta << std::endl;
     if (!meta)
     {
         // Fall back on the file name

@@ -21,6 +21,7 @@ public:
     PNG(var iFileName);
     ~PNG();
     bool valid() { return mData; };
+    void dump();
     var date();
 private:
     png_structp mData;

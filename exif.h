@@ -18,6 +18,7 @@ class EXIF
 public:
     EXIF() { mData = 0; };
     EXIF(var iPath);
+    EXIF(const unsigned char *iData, unsigned int iSize);
     ~EXIF();
     bool valid() { return mData; };
     void dump();
