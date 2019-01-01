@@ -30,16 +30,22 @@ MP4::~MP4()
 
 void MP4::load(var iFileName)
 {
+    // Reduce the log level.  Default is "complain big time", but the file may
+    // not be an MP4 file.
+    MP4LogSetLevel(MP4_LOG_VERBOSE1);
+
     // Open the file
-    mHandle = MP4ReadProvider(iFileName.str());
+    mHandle = MP4Read(iFileName.str());
     if (!MP4_IS_VALID_FILE_HANDLE(mHandle))
         return;
 
     // Copy the metadata tags
+    std::cout << "Getting meta" << std::endl;
     MP4ItmfItemList* itemList;
     itemList = MP4ItmfGetItems(mHandle);
     int nItems = itemList->size;
     MP4ItmfItem* item = itemList->elements;
+    std::cout << "Got " << nItems << " elements" << std::endl;
     for (int i=0; i<nItems; i++)
     {
         std::cout << item[i].code << std::endl;
