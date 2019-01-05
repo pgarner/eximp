@@ -31,10 +31,16 @@ find_package(PNG REQUIRED)
 find_package(Boost COMPONENTS
   filesystem REQUIRED
   )
+
+set(ISOBM_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/isobmff/IsoLib/libisomediafile")
+set(ISOBM_INCLUDE_DIRS "${ISOBM_ROOT}/src" "${ISOBM_ROOT}/linux")
+set(ISOBM_LIBRARIES "${ISOBM_ROOT}/linux/libisomediafile/libisomediafile.a")
+
 include_directories(
   ${LIBUBE_INCLUDE_DIRS}
   ${LIBEXIF_INCLUDE_DIRS}
   ${PNG_INCLUDE_DIRS}
+  ${ISOBM_INCLUDE_DIRS}
 #  ${LIBAVFORMAT_INCLUDE_DIRS}
 #  ${LIBMP4V2_INCLUDE_DIRS}
   )
@@ -42,6 +48,7 @@ set(TARGET_LIBS
   ${LIBUBE_LIBRARIES}
   ${LIBEXIF_LIBRARIES}
   ${PNG_LIBRARIES}
+  ${ISOBM_LIBRARIES}
 #  ${LIBAVFORMAT_LIBRARIES}
 #  ${LIBMP4V2_LIBRARIES}
   ${Boost_LIBRARIES}
@@ -51,6 +58,7 @@ set(TARGET_LIBS
 add_executable(eximp eximp.cpp
   exif.cpp
   png.cpp
+  isobm.cpp
 #  avformat.cpp
 #  mp4v2.cpp
   )

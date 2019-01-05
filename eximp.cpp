@@ -15,6 +15,7 @@
 
 #include "exif.h"
 #include "png.h"
+#include "isobm.h"
 // #include "avformat.h"
 // #include "mp4v2.h"
 
@@ -172,6 +173,25 @@ var pngData(var iPath)
     return meta;
 }
 
+/**
+ * Get the date from an ISO file
+ */
+var isoData(var iPath)
+{
+    ISOBM isobm(iPath);
+    if (!isobm.valid())
+        return nil;
+    if (verbose)
+    {
+        std::cout << std::endl;
+        isobm.dump();
+    }
+
+    // Meta
+    var meta = nil;
+    return meta;
+}
+
 #if 0
 /**
  * Get the date and encoder from an AVFormat record
@@ -245,6 +265,9 @@ var target(var iPrefix, var iPath, var iBit)
 {
     // First try for EXIF data
     var meta = exifData(iPath);
+    if (!meta)
+        // Try ISO data
+        meta = isoData(iPath);
     if (!meta)
         // Try PNG data
         meta = pngData(iPath);
