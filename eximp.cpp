@@ -149,8 +149,7 @@ var exifData(var iPath)
  */
 var pngData(var iPath)
 {
-    // Is it even a photo?
-    // If there is no EXIF there's no point trying to continue
+    // Is it a PNG file?
     PNG png(iPath);
     if (!png.valid())
         return nil;
@@ -160,7 +159,7 @@ var pngData(var iPath)
         png.dump();
     }
 
-    // It's a photo, can we infer the date from exif data?
+    // It's a picture, can we infer the date?
     var da = png.date();
     if (!da)
     {
@@ -188,7 +187,15 @@ var isoData(var iPath)
     }
 
     // Meta
-    var meta = nil;
+    var da = isobm.date();
+    if (!da)
+    {
+        std::cout << " [no ISO date]";
+        return nil;
+    }
+    var meta;
+    meta[0] = da;
+    meta[1] = "Unknown";
     return meta;
 }
 

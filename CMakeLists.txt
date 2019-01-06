@@ -32,9 +32,13 @@ find_package(Boost COMPONENTS
   filesystem REQUIRED
   )
 
-set(ISOBM_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/isobmff/IsoLib/libisomediafile")
-set(ISOBM_INCLUDE_DIRS "${ISOBM_ROOT}/src" "${ISOBM_ROOT}/linux")
-set(ISOBM_LIBRARIES "${ISOBM_ROOT}/linux/libisomediafile/libisomediafile.a")
+# Requires ISOBMFF from https://github.com/DigiDNA/ISOBMFF
+set(ISOBM_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/ISOBMFF")
+set(ISOBM_INCLUDE_DIRS
+  "${ISOBM_ROOT}/ISOBMFF/include"
+  "${ISOBM_ROOT}/Submodules/PIMPL/PIMPL/include"
+  )
+set(ISOBM_LIBRARIES "${ISOBM_ROOT}/Build/Debug/Products/x86_64/libISOBMFF.a")
 
 include_directories(
   ${LIBUBE_INCLUDE_DIRS}
@@ -67,6 +71,9 @@ install(
   TARGETS eximp
   RUNTIME DESTINATION bin
   )
+
+add_executable(dump ${ISOBM_ROOT}/ISOBMFF-Dump/main.cpp)
+target_link_libraries(dump ${TARGET_LIBS})
 
 # The exiv library
 #add_library(exif-lib MODULE exif.cpp)

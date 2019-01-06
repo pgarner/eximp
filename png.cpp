@@ -92,7 +92,7 @@ void PNG::dump()
     }
 }
 
-var format(int iNumber, int iWidth)
+static var format(int iNumber, int iWidth)
 {
     varstream vs;
     vs << std::setw(iWidth) << std::setfill('0');

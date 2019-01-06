@@ -10,7 +10,7 @@
 #define ISOBM_H
 
 #include <lube.h>
-#include "ISOMovies.h"
+#include "ISOBMFF.hpp"
 
 class ISOBM
 {
@@ -18,11 +18,11 @@ public:
     ISOBM();
     ISOBM(var iFileName);
     ~ISOBM();
-    bool valid() { return mData; };
+    bool valid() { return bool(mParser.GetFile()); };
     void dump();
-    //var date();
+    var date();
 private:
-    ISOMovie mData;
+    ISOBMFF::Parser mParser;
     void load(var iFileName);
 };
 
