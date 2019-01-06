@@ -32,8 +32,17 @@ find_package(Boost COMPONENTS
   filesystem REQUIRED
   )
 
-# Requires ISOBMFF from https://github.com/DigiDNA/ISOBMFF
-set(ISOBM_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/ISOBMFF")
+include(ExternalProject)
+find_package(Git REQUIRED)
+ExternalProject_Add(ISOBMFF
+  GIT_REPOSITORY    https://github.com/pgarner/ISOBMFF
+  GIT_TAG           devel
+  BUILD_IN_SOURCE   true
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ${CMAKE_MAKE_PROGRAM}
+  INSTALL_COMMAND   ""
+)
+set(ISOBM_ROOT "${CMAKE_CURRENT_BINARY_DIR}/ISOBMFF-prefix/src/ISOBMFF")
 set(ISOBM_INCLUDE_DIRS
   "${ISOBM_ROOT}/ISOBMFF/include"
   "${ISOBM_ROOT}/Submodules/PIMPL/PIMPL/include"
@@ -66,14 +75,16 @@ add_executable(eximp eximp.cpp
 #  avformat.cpp
 #  mp4v2.cpp
   )
+add_dependencies(eximp ISOBMFF)
 target_link_libraries(eximp ${TARGET_LIBS})
 install(
   TARGETS eximp
   RUNTIME DESTINATION bin
   )
 
-add_executable(dump ${ISOBM_ROOT}/ISOBMFF-Dump/main.cpp)
-target_link_libraries(dump ${TARGET_LIBS})
+# This only works after the ISOBMFF external is at least downloaded
+#add_executable(dump ${ISOBM_ROOT}/ISOBMFF-Dump/main.cpp)
+#target_link_libraries(dump ${TARGET_LIBS})
 
 # The exiv library
 #add_library(exif-lib MODULE exif.cpp)
