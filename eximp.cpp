@@ -14,8 +14,9 @@
 #include <wordexp.h>
 
 #include "exif.h"
+#include "heif.h"
 #include "png.h"
-#include "isobm.h"
+// #include "isobm.h"
 // #include "avformat.h"
 // #include "mp4v2.h"
 
@@ -173,6 +174,34 @@ var pngData(var iPath)
 }
 
 /**
+ * Read a HEIF file
+ */
+var heifData(var iPath)
+{
+    HEIF heif(iPath);
+    if (!heif.valid())
+        return nil;
+    if (verbose)
+    {
+        std::cout << std::endl;
+        heif.dump();
+    }
+
+    // It's a picture, can we infer the date?
+    var da = heif.date();
+    if (!da)
+    {
+        std::cout << " [no HEIF date]";
+        return nil;
+    }
+    var meta;
+    meta[0] = da;
+    meta[1] = "Unknown";
+    return meta;
+}
+
+#if 0
+/**
  * Get the date from an ISO file
  */
 var isoData(var iPath)
@@ -198,6 +227,7 @@ var isoData(var iPath)
     meta[1] = "Unknown";
     return meta;
 }
+#endif
 
 #if 0
 /**
@@ -273,12 +303,15 @@ var target(var iPrefix, var iPath, var iBit)
     // First try for EXIF data
     var meta = exifData(iPath);
     if (!meta)
-        // Try ISO data
-        meta = isoData(iPath);
-    if (!meta)
         // Try PNG data
         meta = pngData(iPath);
+    if (!meta)
+        // Try HEIF data
+        meta = heifData(iPath);
 #if 0
+    if (!meta)
+        // Try ISO data
+        meta = isoData(iPath);
     if (!meta)
         // Try AVFormat data
         meta = avData(iPath);

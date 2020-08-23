@@ -11,18 +11,14 @@
 
 EXIF::EXIF(var iPath)
 {
-    mData = exif_data_new_from_file(iPath.str());
-    if (mData)
-        // I'm not sure this is necessary, but it feels good
-        exif_data_fix(mData);
+    mData = 0;
+    load(iPath);
 }
 
 EXIF::EXIF(const unsigned char *iData, unsigned int iSize)
 {
-    mData = exif_data_new_from_data(iData, iSize);
-    if (mData)
-        // I'm not sure this is necessary, but it feels good
-        exif_data_fix(mData);
+    mData = 0;
+    load(iData, iSize);
 }
 
 EXIF::~EXIF()
@@ -30,6 +26,26 @@ EXIF::~EXIF()
     if (mData)
         exif_data_free(mData);
     mData = 0;
+}
+
+void EXIF::load(var iPath)
+{
+    if (mData)
+        exif_data_free(mData);
+    mData = exif_data_new_from_file(iPath.str());
+    if (mData)
+        // I'm not sure this is necessary, but it feels good
+        exif_data_fix(mData);
+}
+
+void EXIF::load(const unsigned char *iData, unsigned int iSize)
+{
+    if (mData)
+        exif_data_free(mData);
+    mData = exif_data_new_from_data(iData, iSize);
+    if (mData)
+        // Ditto...
+        exif_data_fix(mData);
 }
 
 void EXIF::dump()

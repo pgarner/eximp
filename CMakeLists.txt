@@ -26,40 +26,43 @@ endif()
 find_package(LibUBE REQUIRED)
 find_package(LibEXIF REQUIRED)
 find_package(PNG REQUIRED)
+find_package(LibHEIF)
 # find_package(LibAVFormat REQUIRED)
 # find_package(LibMP4v2)
 find_package(Boost COMPONENTS
   filesystem REQUIRED
   )
 
-include(ExternalProject)
-find_package(Git REQUIRED)
-ExternalProject_Add(ISOBMFF
-  GIT_REPOSITORY    https://github.com/pgarner/ISOBMFF
-  GIT_TAG           devel
-  BUILD_IN_SOURCE   true
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND     ${CMAKE_MAKE_PROGRAM}
-  INSTALL_COMMAND   ""
-)
-set(ISOBM_ROOT "${CMAKE_CURRENT_BINARY_DIR}/ISOBMFF-prefix/src/ISOBMFF")
-set(ISOBM_INCLUDE_DIRS
-  "${ISOBM_ROOT}/ISOBMFF/include"
-  "${ISOBM_ROOT}/Submodules/PIMPL/PIMPL/include"
-  )
-set(ISOBM_LIBRARIES "${ISOBM_ROOT}/Build/Debug/Products/x86_64/libISOBMFF.a")
+#include(ExternalProject)
+#find_package(Git REQUIRED)
+#ExternalProject_Add(ISOBMFF
+#  GIT_REPOSITORY    https://github.com/pgarner/ISOBMFF
+#  GIT_TAG           devel
+#  BUILD_IN_SOURCE   true
+#  CONFIGURE_COMMAND ""
+#  BUILD_COMMAND     ${CMAKE_MAKE_PROGRAM}
+#  INSTALL_COMMAND   ""
+#)
+#set(ISOBM_ROOT "${CMAKE_CURRENT_BINARY_DIR}/ISOBMFF-prefix/src/ISOBMFF")
+#set(ISOBM_INCLUDE_DIRS
+#  "${ISOBM_ROOT}/ISOBMFF/include"
+#  "${ISOBM_ROOT}/Submodules/PIMPL/PIMPL/include"
+#  )
+#set(ISOBM_LIBRARIES "${ISOBM_ROOT}/Build/Debug/Products/x86_64/libISOBMFF.a")
 
 include_directories(
   ${LIBUBE_INCLUDE_DIRS}
   ${LIBEXIF_INCLUDE_DIRS}
+  ${LIBHEIF_INCLUDE_DIRS}
   ${PNG_INCLUDE_DIRS}
-  ${ISOBM_INCLUDE_DIRS}
+#  ${ISOBM_INCLUDE_DIRS}
 #  ${LIBAVFORMAT_INCLUDE_DIRS}
 #  ${LIBMP4V2_INCLUDE_DIRS}
   )
 set(TARGET_LIBS
   ${LIBUBE_LIBRARIES}
   ${LIBEXIF_LIBRARIES}
+  ${LIBHEIF_LIBRARIES}
   ${PNG_LIBRARIES}
   ${ISOBM_LIBRARIES}
 #  ${LIBAVFORMAT_LIBRARIES}
@@ -71,11 +74,12 @@ set(TARGET_LIBS
 add_executable(eximp eximp.cpp
   exif.cpp
   png.cpp
-  isobm.cpp
+  heif.cpp
+#  isobm.cpp
 #  avformat.cpp
 #  mp4v2.cpp
   )
-add_dependencies(eximp ISOBMFF)
+# add_dependencies(eximp ISOBMFF)
 target_link_libraries(eximp ${TARGET_LIBS})
 install(
   TARGETS eximp

@@ -20,6 +20,8 @@ public:
     EXIF(var iPath);
     EXIF(const unsigned char *iData, unsigned int iSize);
     ~EXIF();
+    void load(var iPath);
+    void load(const unsigned char *iData, unsigned int iSize);
     bool valid() { return mData; };
     void dump();
     var entry(ExifTag iTag);
