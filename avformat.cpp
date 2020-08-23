@@ -33,7 +33,6 @@ AVFormat::~AVFormat()
 
 void AVFormat::load(var iFileName)
 {
-    av_register_all();
     int ret = avformat_open_input(&mContext, iFileName.str(), 0, 0);
     if (ret)
     {

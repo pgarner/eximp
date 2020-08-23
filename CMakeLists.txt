@@ -25,13 +25,60 @@ endif()
 
 find_package(LibUBE REQUIRED)
 find_package(LibEXIF REQUIRED)
+find_package(LibHEIF REQUIRED)
 find_package(PNG REQUIRED)
-find_package(LibHEIF)
-# find_package(LibAVFormat REQUIRED)
-# find_package(LibMP4v2)
 find_package(Boost COMPONENTS
   filesystem REQUIRED
   )
+
+set(SOURCES
+  eximp.cpp
+  exif.cpp
+  png.cpp
+  heif.cpp
+  )
+
+include_directories(
+  ${LIBUBE_INCLUDE_DIRS}
+  ${LIBEXIF_INCLUDE_DIRS}
+  ${LIBHEIF_INCLUDE_DIRS}
+  ${PNG_INCLUDE_DIRS}
+  )
+set(TARGET_LIBS
+  ${LIBUBE_LIBRARIES}
+  ${LIBEXIF_LIBRARIES}
+  ${LIBHEIF_LIBRARIES}
+  ${PNG_LIBRARIES}
+  ${Boost_LIBRARIES}
+  )
+
+find_package(LibAVFormat)
+if (LIBAVFORMAT_FOUND)
+  message(STATUS "Including LibAVFormat support")
+  add_definitions(-DHAVE_AVFORMAT)
+  include_directories(${LIBAVFORMAT_INCLUDE_DIRS})
+  list(APPEND TARGET_LIBS ${LIBAVFORMAT_LIBRARIES})
+  list(APPEND SOURCES avformat.cpp)
+endif()
+
+# Main executable
+add_executable(eximp ${SOURCES})
+target_link_libraries(eximp ${TARGET_LIBS})
+
+#
+# LibAVFormat has lots (some stupid number) of deps, so I messed with using
+# dedicated MP4 libs.  In the end it seems too much trouble.  Below are some
+# lines that may be helpful if that gets resurrected.
+#
+
+# find_package(LibMP4v2)
+#  ${ISOBM_INCLUDE_DIRS}
+#  ${LIBMP4V2_INCLUDE_DIRS}
+#  ${LIBMP4V2_LIBRARIES}
+#  ${ISOBM_LIBRARIES}
+#  isobm.cpp
+#  mp4v2.cpp
+# add_dependencies(eximp ISOBMFF)
 
 #include(ExternalProject)
 #find_package(Git REQUIRED)
@@ -50,42 +97,6 @@ find_package(Boost COMPONENTS
 #  )
 #set(ISOBM_LIBRARIES "${ISOBM_ROOT}/Build/Debug/Products/x86_64/libISOBMFF.a")
 
-include_directories(
-  ${LIBUBE_INCLUDE_DIRS}
-  ${LIBEXIF_INCLUDE_DIRS}
-  ${LIBHEIF_INCLUDE_DIRS}
-  ${PNG_INCLUDE_DIRS}
-#  ${ISOBM_INCLUDE_DIRS}
-#  ${LIBAVFORMAT_INCLUDE_DIRS}
-#  ${LIBMP4V2_INCLUDE_DIRS}
-  )
-set(TARGET_LIBS
-  ${LIBUBE_LIBRARIES}
-  ${LIBEXIF_LIBRARIES}
-  ${LIBHEIF_LIBRARIES}
-  ${PNG_LIBRARIES}
-  ${ISOBM_LIBRARIES}
-#  ${LIBAVFORMAT_LIBRARIES}
-#  ${LIBMP4V2_LIBRARIES}
-  ${Boost_LIBRARIES}
-  )
-
-# Main executable
-add_executable(eximp eximp.cpp
-  exif.cpp
-  png.cpp
-  heif.cpp
-#  isobm.cpp
-#  avformat.cpp
-#  mp4v2.cpp
-  )
-# add_dependencies(eximp ISOBMFF)
-target_link_libraries(eximp ${TARGET_LIBS})
-install(
-  TARGETS eximp
-  RUNTIME DESTINATION bin
-  )
-
 # This only works after the ISOBMFF external is at least downloaded
 #add_executable(dump ${ISOBM_ROOT}/ISOBMFF-Dump/main.cpp)
 #target_link_libraries(dump ${TARGET_LIBS})
@@ -97,3 +108,8 @@ install(
 #  )
 #target_link_libraries(exif-lib card)
 #list(APPEND MODULE_TARGETS exif-lib)
+
+install(
+  TARGETS eximp
+  RUNTIME DESTINATION bin
+  )

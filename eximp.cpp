@@ -16,8 +16,12 @@
 #include "exif.h"
 #include "heif.h"
 #include "png.h"
+
+#ifdef HAVE_AVFORMAT
+# include "avformat.h"
+#endif
+
 // #include "isobm.h"
-// #include "avformat.h"
 // #include "mp4v2.h"
 
 using namespace lube;
@@ -245,7 +249,7 @@ var isoData(var iPath)
 }
 #endif
 
-#if 0
+#ifdef HAVE_AVFORMAT
 /**
  * Get the date and encoder from an AVFormat record
  */
@@ -287,7 +291,9 @@ var avData(var iPath)
     meta[1] = var(mm).replace(" ", "-");
     return meta;
 }
+#endif
 
+#if 0
 /**
  * Get the date from an MP4 file
  */
@@ -324,13 +330,15 @@ var target(var iPrefix, var iPath, var iBit)
     if (!meta)
         // Try HEIF data
         meta = heifData(iPath);
+#ifdef HAVE_AVFORMAT
+    if (!meta)
+        // Try AVFormat data
+        meta = avData(iPath);
+#endif
 #if 0
     if (!meta)
         // Try ISO data
         meta = isoData(iPath);
-    if (!meta)
-        // Try AVFormat data
-        meta = avData(iPath);
     if (!meta)
         // Try MP4 data
         meta = mp4Data(iPath);
