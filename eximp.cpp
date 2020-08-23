@@ -90,6 +90,35 @@ var dateMatch(var iStr)
     return array;
 }
 
+/*
+ * Format the exif make model information
+ */
+var catMakeModel(var iMake, var iModel)
+{
+    // Try for make and model
+    // ...this seems way too long
+    varstream mm;
+    if (iMake)
+        mm << iMake.str();
+    if (iModel)
+    {
+        // Models don't need makes
+        iModel.replace("Canon ", "");
+        iModel.replace("HTC ", "");
+        iModel.replace("HTC_", "");
+        iModel.replace("BlackBerry ", "");
+        iModel.replace("NIKON ", "");
+        iModel.replace("KODAK ", "");
+        if (iMake)
+            mm << " ";
+        mm << iModel.str();
+    }
+    if (!iMake && !iModel)
+        mm << "Unknown";
+    var m = var(mm).replace(" ", "-");
+    return m;
+}
+
 /**
  * Get the date, make and model from an EXIF record
  */
@@ -114,29 +143,10 @@ var exifData(var iPath)
         return nil;
     }
 
-    // Try for make and model
-    // ...this seems way too long
-    varstream mm;
+    // Make & model
     var m = exif.entry(EXIF_TAG_MAKE);
-    if (m)
-        mm << m.str();
     var n = exif.entry(EXIF_TAG_MODEL);
-    if (n)
-    {
-        // Models don't need makes
-        n.replace("Canon ", "");
-        n.replace("HTC ", "");
-        n.replace("HTC_", "");
-        n.replace("BlackBerry ", "");
-        n.replace("NIKON ", "");
-        n.replace("KODAK ", "");
-        if (m)
-            mm << " ";
-        mm << n.str();
-    }
-    if (!m && !n)
-        mm << "Unknown";
-    m = var(mm).replace(" ", "-");
+    m = catMakeModel(m, n);
 
     // The metadata is date array plus make-model string
     var meta;
@@ -194,9 +204,15 @@ var heifData(var iPath)
         std::cout << " [no HEIF date]";
         return nil;
     }
+
+    // Make & model
+    var m = heif.entry(EXIF_TAG_MAKE);
+    var n = heif.entry(EXIF_TAG_MODEL);
+    m = catMakeModel(m, n);
+
     var meta;
     meta[0] = da;
-    meta[1] = "Unknown";
+    meta[1] = m;
     return meta;
 }
 
