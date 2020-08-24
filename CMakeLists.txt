@@ -48,7 +48,7 @@ set(TARGET_LIBS
   ${Boost_LIBRARIES}
   )
 
-find_package(LibHEIF REQUIRED)
+find_package(LibHEIF)
 if (LIBHEIF_FOUND)
   message(STATUS "Including LibHEIF support")
   add_definitions(-DHAVE_HEIF)
