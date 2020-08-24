@@ -25,7 +25,6 @@ endif()
 
 find_package(LibUBE REQUIRED)
 find_package(LibEXIF REQUIRED)
-find_package(LibHEIF REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Boost COMPONENTS
   filesystem REQUIRED
@@ -35,22 +34,28 @@ set(SOURCES
   eximp.cpp
   exif.cpp
   png.cpp
-  heif.cpp
   )
 
 include_directories(
   ${LIBUBE_INCLUDE_DIRS}
   ${LIBEXIF_INCLUDE_DIRS}
-  ${LIBHEIF_INCLUDE_DIRS}
   ${PNG_INCLUDE_DIRS}
   )
 set(TARGET_LIBS
   ${LIBUBE_LIBRARIES}
   ${LIBEXIF_LIBRARIES}
-  ${LIBHEIF_LIBRARIES}
   ${PNG_LIBRARIES}
   ${Boost_LIBRARIES}
   )
+
+find_package(LibHEIF REQUIRED)
+if (LIBHEIF_FOUND)
+  message(STATUS "Including LibHEIF support")
+  add_definitions(-DHAVE_HEIF)
+  include_directories(${LIBHEIF_INCLUDE_DIRS})
+  list(APPEND TARGET_LIBS ${LIBHEIF_LIBRARIES})
+  list(APPEND SOURCES heif.cpp)
+endif()
 
 find_package(LibAVFormat)
 if (LIBAVFORMAT_FOUND)

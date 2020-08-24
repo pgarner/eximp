@@ -14,9 +14,11 @@
 #include <wordexp.h>
 
 #include "exif.h"
-#include "heif.h"
 #include "png.h"
 
+#ifdef HAVE_HEIF
+# include "heif.h"
+#endif
 #ifdef HAVE_AVFORMAT
 # include "avformat.h"
 #endif
@@ -187,6 +189,7 @@ var pngData(var iPath)
     return meta;
 }
 
+#ifdef HAVE_HEIF
 /**
  * Read a HEIF file
  */
@@ -217,34 +220,6 @@ var heifData(var iPath)
     var meta;
     meta[0] = da;
     meta[1] = m;
-    return meta;
-}
-
-#if 0
-/**
- * Get the date from an ISO file
- */
-var isoData(var iPath)
-{
-    ISOBM isobm(iPath);
-    if (!isobm.valid())
-        return nil;
-    if (verbose)
-    {
-        std::cout << std::endl;
-        isobm.dump();
-    }
-
-    // Meta
-    var da = isobm.date();
-    if (!da)
-    {
-        std::cout << " [no ISO date]";
-        return nil;
-    }
-    var meta;
-    meta[0] = da;
-    meta[1] = "Unknown";
     return meta;
 }
 #endif
@@ -295,6 +270,33 @@ var avData(var iPath)
 
 #if 0
 /**
+ * Get the date from an ISO file
+ */
+var isoData(var iPath)
+{
+    ISOBM isobm(iPath);
+    if (!isobm.valid())
+        return nil;
+    if (verbose)
+    {
+        std::cout << std::endl;
+        isobm.dump();
+    }
+
+    // Meta
+    var da = isobm.date();
+    if (!da)
+    {
+        std::cout << " [no ISO date]";
+        return nil;
+    }
+    var meta;
+    meta[0] = da;
+    meta[1] = "Unknown";
+    return meta;
+}
+
+/**
  * Get the date from an MP4 file
  */
 var mp4Data(var iPath)
@@ -327,9 +329,11 @@ var target(var iPrefix, var iPath, var iBit)
     if (!meta)
         // Try PNG data
         meta = pngData(iPath);
+#ifdef HAVE_HEIF
     if (!meta)
         // Try HEIF data
         meta = heifData(iPath);
+#endif
 #ifdef HAVE_AVFORMAT
     if (!meta)
         // Try AVFormat data
