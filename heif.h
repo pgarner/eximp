@@ -11,7 +11,7 @@
 #define LUBE_HEIF_H
 
 #include <lube.h>
-#include <heif.h>
+#include <libheif/heif.h>
 
 #include "exif.h"
 

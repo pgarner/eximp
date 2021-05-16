@@ -11,7 +11,7 @@
 #define EXIF_H
 
 #include <lube.h>
-#include <exif-data.h>
+#include <libexif/exif-data.h>
 
 class EXIF
 {
