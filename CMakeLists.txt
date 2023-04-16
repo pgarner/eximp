@@ -15,15 +15,7 @@ set(VERSION 0.1)
 set(CMAKE_CXX_FLAGS "-Wall -Werror -std=c++11")
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-if (NOT EXISTS "${CMAKE_MODULE_PATH}/FindLibUBE.cmake")
-  message(STATUS "Downloading FindLibUBE.cmake")
-  file(DOWNLOAD
-    "https://github.com/pgarner/libube/raw/master/cmake/FindLibUBE.cmake"
-    "${CMAKE_MODULE_PATH}/FindLibUBE.cmake"
-    )
-endif()
-
-find_package(LibUBE REQUIRED)
+find_package(lube REQUIRED)
 find_package(LibEXIF REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Boost COMPONENTS
@@ -37,12 +29,11 @@ set(SOURCES
   )
 
 include_directories(
-  ${LIBUBE_INCLUDE_DIRS}
   ${LIBEXIF_INCLUDE_DIRS}
   ${PNG_INCLUDE_DIRS}
   )
 set(TARGET_LIBS
-  ${LIBUBE_LIBRARIES}
+  lube::lube-shared
   ${LIBEXIF_LIBRARIES}
   ${PNG_LIBRARIES}
   ${Boost_LIBRARIES}
