@@ -10,7 +10,7 @@
 #include <lube.h>
 #include <lube/path.h>
 #include <lube/config.h>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <wordexp.h>
 
 #include "exif.h"
@@ -27,7 +27,7 @@
 // #include "mp4v2.h"
 
 using namespace lube;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 bool verbose = false;
 
@@ -503,7 +503,7 @@ int main(int argc, char** argv)
                 fs::copy(s.str(), path.str());
             else if (o['m'])
             {
-                boost::system::error_code ec;
+                std::error_code ec;
                 fs::copy(s.str(), path.str(), ec);
                 if (ec.value() == 0)
                     fs::remove(s.str());

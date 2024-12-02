@@ -7,20 +7,17 @@
 #   Phil Garner, September 2014
 #
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 
 project(eximp)
 set(VERSION 0.1)
 
-set(CMAKE_CXX_FLAGS "-Wall -Werror -std=c++11")
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(lube REQUIRED)
 find_package(LibEXIF REQUIRED)
 find_package(PNG REQUIRED)
-find_package(Boost COMPONENTS
-  filesystem REQUIRED
-  )
 
 set(SOURCES
   eximp.cpp
@@ -107,5 +104,5 @@ target_link_libraries(eximp ${TARGET_LIBS})
 
 install(
   TARGETS eximp
-  RUNTIME DESTINATION bin
+#  RUNTIME DESTINATION bin
   )
