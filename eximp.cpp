@@ -329,15 +329,16 @@ var target(var iPrefix, var iPath, var iBit)
     if (!meta)
         // Try PNG data
         meta = pngData(iPath);
-#ifdef HAVE_HEIF
-    if (!meta)
-        // Try HEIF data
-        meta = heifData(iPath);
-#endif
 #ifdef HAVE_AVFORMAT
     if (!meta)
         // Try AVFormat data
         meta = avData(iPath);
+#endif
+#ifdef HAVE_HEIF
+    // After AVFormat because mp4 can look like heif
+    if (!meta)
+        // Try HEIF data
+        meta = heifData(iPath);
 #endif
 #if 0
     if (!meta)
